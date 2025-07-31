@@ -1,18 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sightings — UAPON</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS -->
   <link rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin=""/>
+        crossorigin="" />
 </head>
+
 <body class="bg-slate-900 text-slate-100">
 
-  <!-- (...) TU HTML EXISTENTE IGUAL IGUAL HASTA LA TABLA (...) -->
+  <!-- Header -->
+  <header class="bg-slate-800 relative">
+    <div class="container mx-auto flex items-center justify-between px-6 py-4">
+      <a href="index.html" class="flex items-center space-x-2">
+        <div class="h-8 w-8 bg-slate-600 rounded"></div>
+        <span class="text-2xl font-semibold text-white">UAPON</span>
+      </a>
+      <button id="nav-toggle" class="block md:hidden text-slate-100 focus:outline-none">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <nav class="hidden md:flex md:items-center md:space-x-6">
+        <a href="/" class="text-white hover:text-blue-400">Home</a>
+        <a href="/sightings/" class="text-white hover:text-blue-400">Sightings</a>
+        <a href="/statistics/" class="text-white hover:text-blue-400">Statistics</a>
+        <a href="/community/" class="text-white hover:text-blue-400">Community</a>
+        <a href="/contact/" class="text-white hover:text-blue-400">Contact</a>
+        <a href="/report/" class="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-500">
+          Report Sighting
+        </a>
+      </nav>
+    </div>
+    <nav id="nav-menu" class="hidden absolute top-full left-0 w-full bg-slate-800 shadow-lg border-t border-slate-700 z-50 md:hidden">
+      <div class="flex flex-col px-6 py-4">
+        <a href="/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700 transition-colors">Home</a>
+        <a href="/sightings/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700 transition-colors">Sightings</a>
+        <a href="/statistics/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700 transition-colors">Statistics</a>
+        <a href="/community/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700 transition-colors">Community</a>
+        <a href="/contact/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700 transition-colors">Contact</a>
+        <a href="/report/" class="block bg-blue-600 text-white rounded px-4 py-3 mt-4 text-center hover:bg-blue-500 transition-colors">
+          Report Sighting
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative bg-[url('starry-bg.jpg')] bg-cover bg-center py-20">
+    <div class="container mx-auto text-center px-6">
+      <h1 class="text-4xl sm:text-5xl font-bold mb-4">All UAP Sightings</h1>
+      <p class="text-lg sm:text-xl text-slate-300 mb-8">
+        Browse, filter and explore every submitted UAP report from our community.
+      </p>
+    </div>
+  </section>
+
+  <!-- Filters & Summary -->
+  <section class="container mx-auto py-12 px-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <form class="flex flex-wrap gap-4">
+        <input type="date" name="from" class="rounded bg-slate-700 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <input type="date" name="to" class="rounded bg-slate-700 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <input type="text" name="location" placeholder="Location"
+               class="rounded bg-slate-700 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <select name="status" class="rounded bg-slate-700 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+          <option value="">Any Status</option>
+          <option value="pending">Pending</option>
+          <option value="verified">Verified</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button type="submit" class="rounded bg-blue-600 px-4 py-2 font-semibold hover:bg-blue-500">
+          Apply Filters
+        </button>
+      </form>
+      <div class="flex space-x-8 text-center">
+        <div>
+          <p class="text-3xl font-bold">1,234</p>
+          <p class="text-slate-400 text-sm">Total Reports</p>
+        </div>
+        <div>
+          <p class="text-3xl font-bold">456</p>
+          <p class="text-slate-400 text-sm">Verified</p>
+        </div>
+        <div>
+          <p class="text-3xl font-bold">78</p>
+          <p class="text-slate-400 text-sm">Pending</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map -->
+  <section class="container mx-auto py-12 px-6">
+    <h2 class="text-2xl font-semibold mb-4">Sightings Map</h2>
+    <div id="map" class="h-96 rounded-lg bg-slate-700"></div>
+  </section>
 
   <!-- Table -->
   <section class="container mx-auto py-12 px-6">
@@ -29,9 +119,8 @@
           </tr>
         </thead>
         <tbody id="sightings-table">
-          <!-- Aquí aparecerán dinámicamente las filas -->
           <tr>
-            <td class="px-4 py-2 text-center text-slate-400" colspan="5">
+            <td colspan="5" class="px-4 py-2 text-center text-slate-400">
               Cargando avistamientos…
             </td>
           </tr>
@@ -40,36 +129,58 @@
     </div>
   </section>
 
-  <!-- Footer y resto de tu HTML intactos -->
+  <!-- Footer -->
+  <footer class="bg-slate-900 py-8 px-6">
+    <div class="container mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+      <div>
+        <h4 class="font-semibold mb-2">UAPON</h4>
+        <p>Community network for observing unidentified aerial phenomena.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Links</h4>
+        <ul class="space-y-1">
+          <li><a href="index.html" class="hover:text-white">Home</a></li>
+          <li><a href="community.html" class="hover:text-white">Community</a></li>
+          <li><a href="report.html" class="hover:text-white">Report</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Contact</h4>
+        <p>support@uapon.com</p>
+      </div>
+    </div>
+    <p class="mt-8 text-center text-slate-600 text-sm">&copy; 2025 UAPON. All rights reserved.</p>
+  </footer>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <script>
-    // Mobile Nav (tu código original)
+    // Mobile navigation
     const btn = document.getElementById('nav-toggle');
     const menu = document.getElementById('nav-menu');
     btn.addEventListener('click', () => menu.classList.toggle('hidden'));
 
-    // ----- INICIA INTEGRACIÓN DINÁMICA -----
+    // ----- DEBUG & DINÁMICO -----
+    console.log("🟢 Script de integración arrancado");
     const API_URL   = "https://uapon.directus.app/items/sightings";
     const tableBody = document.getElementById("sightings-table");
+    console.log("TablaBody control:", tableBody);
     let map, markerLayerGroup;
 
     async function cargarAvistamientos() {
+      console.log("🔄 Invocando fetch a", API_URL);
       try {
-        // Fetch y validación de respuesta
         const res = await fetch(API_URL);
+        console.log("✅ Respuesta fetch status:", res.status);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const { data } = await res.json();
-        console.log("Datos recibidos:", data);
+        console.log("✅ JSON recibido:", data);
 
-        // Limpiar tabla
+        // Limpiar tabla y marcadores
         tableBody.innerHTML = "";
-
-        // Limpiar solo los marcadores previos
         markerLayerGroup.clearLayers();
 
-        // Si no hay datos, avisa
         if (!data.length) {
           tableBody.innerHTML = `
             <tr>
@@ -80,67 +191,9 @@
           return;
         }
 
-        // Insertar filas y marcadores
         data.forEach(item => {
-          // Fila en la tabla
+          // Fila dinámica
           const tr = document.createElement("tr");
           tr.className = "bg-slate-700 hover:bg-slate-600";
           tr.innerHTML = `
-            <td class="px-4 py-2">
-              ${new Date(item.date_time).toLocaleDateString()}
-            </td>
-            <td class="px-4 py-2">
-              ${item.latitude}, ${item.longitude}
-            </td>
-            <td class="px-4 py-2">Usuario</td>
-            <td class="px-4 py-2">
-              <span class="rounded px-2 py-1 text-xs ${
-                item.status === "verified" ? "bg-green-600" :
-                item.status === "pending"  ? "bg-yellow-500" :
-                                             "bg-red-600"
-              }">${item.status}</span>
-            </td>
-            <td class="px-4 py-2">
-              <a href="#" class="text-blue-400 hover:underline">View</a>
-            </td>`;
-          tableBody.appendChild(tr);
-
-          // Marcador en el mapa
-          if (item.latitude && item.longitude) {
-            const marker = L.marker([item.latitude, item.longitude])
-              .bindPopup(`<b>${item.title}</b><br>${item.description}`);
-            markerLayerGroup.addLayer(marker);
-          }
-        });
-      } catch (err) {
-        console.error("Error cargando avistamientos:", err);
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="5" class="px-4 py-2 text-red-400">
-              Error cargando datos.
-            </td>
-          </tr>`;
-      }
-    }
-
-    function initMap() {
-      map = L.map("map").setView([4.6939, -74.0696], 3);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "© OpenStreetMap",
-      }).addTo(map);
-
-      // Creamos un grupo de capas para marcadores
-      markerLayerGroup = L.layerGroup().addTo(map);
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      initMap();
-      cargarAvistamientos();
-      setInterval(cargarAvistamientos, 10000); // refrescar cada 10s
-    });
-    // ----- FIN INTEGRACIÓN DINÁMICA -----
-  </script>
-
-</body>
-</html>
+            <t
