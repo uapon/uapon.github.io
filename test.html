@@ -113,6 +113,8 @@
       <table class="min-w-full table-auto text-left">
         <thead>
           <tr class="bg-slate-800">
+            <th class="px-4 py-2">Title</th>
+            <th class="px-4 py-2">Description</th>
             <th class="px-4 py-2">Date</th>
             <th class="px-4 py-2">Location</th>
             <th class="px-4 py-2">Uploader</th>
@@ -122,7 +124,7 @@
         </thead>
         <tbody id="sightings-table">
           <tr>
-            <td colspan="5" class="px-4 py-2 text-center text-slate-400">
+            <td colspan="7" class="px-4 py-2 text-center text-slate-400">
               Cargando avistamientos…
             </td>
           </tr>
@@ -157,12 +159,14 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-  <!-- Script de integración -->
+  <!-- Integration Script -->
   <script>
     console.log("🟢 Script arrancado");
-    const API_URL   = "https://uapon.directus.app/items/sightings";
+    // incluimos expand de creador de usuario
+    const API_URL = "https://uapon.directus.app/items/sightings?" +
+      "fields=title,description,date_time,latitude,longitude,status," +
+      "created_by.first_name,created_by.last_name";
     const tableBody = document.getElementById("sightings-table");
-    console.log("TablaBody:", tableBody);
 
     let map, markerLayerGroup;
 
@@ -191,7 +195,7 @@
         if (!data.length) {
           tableBody.innerHTML = `
             <tr>
-              <td colspan="5" class="px-4 py-2 text-center text-slate-400">
+              <td colspan="7" class="px-4 py-2 text-center text-slate-400">
                 No hay avistamientos.
               </td>
             </tr>`;
@@ -199,12 +203,19 @@
         }
 
         data.forEach(item => {
+          // crear nombre de uploader
+          const uploader = item.created_by
+            ? `${item.created_by.first_name} ${item.created_by.last_name}`
+            : "Usuario";
+
           const tr = document.createElement("tr");
           tr.className = "bg-slate-700 hover:bg-slate-600";
           tr.innerHTML = `
+            <td class="px-4 py-2">${item.title}</td>
+            <td class="px-4 py-2">${item.description}</td>
             <td class="px-4 py-2">${new Date(item.date_time).toLocaleDateString()}</td>
             <td class="px-4 py-2">${item.latitude}, ${item.longitude}</td>
-            <td class="px-4 py-2">Usuario</td>
+            <td class="px-4 py-2">${uploader}</td>
             <td class="px-4 py-2">
               <span class="rounded px-2 py-1 text-xs ${
                 item.status === "verified" ? "bg-green-600" :
@@ -225,8 +236,8 @@
         console.error("❌ Error:", err);
         tableBody.innerHTML = `
           <tr>
-            <td colspan="5" class="px-4 py-2 text-red-400">
-              Error cargando datos.
+            <td colspan="7" class="px-4 py-2 text-red-400">
+              Error cargando datos: ${err.message}
             </td>
           </tr>`;
       }
