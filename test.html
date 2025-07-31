@@ -7,10 +7,12 @@
   <title>Sightings — UAPON</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Leaflet CSS -->
-  <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin="" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
 </head>
 
 <body class="bg-slate-900 text-slate-100">
@@ -155,29 +157,34 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
+  <!-- Script de integración -->
   <script>
-    // Mobile navigation
-    const btn = document.getElementById('nav-toggle');
-    const menu = document.getElementById('nav-menu');
-    btn.addEventListener('click', () => menu.classList.toggle('hidden'));
-
-    // ----- DEBUG & DINÁMICO -----
-    console.log("🟢 Script de integración arrancado");
+    console.log("🟢 Script arrancado");
     const API_URL   = "https://uapon.directus.app/items/sightings";
     const tableBody = document.getElementById("sightings-table");
-    console.log("TablaBody control:", tableBody);
+    console.log("TablaBody:", tableBody);
+
     let map, markerLayerGroup;
 
+    function initMap() {
+      console.log("🗺️ Inicializando mapa");
+      map = L.map("map").setView([4.6939, -74.0696], 3);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap",
+      }).addTo(map);
+      markerLayerGroup = L.layerGroup().addTo(map);
+    }
+
     async function cargarAvistamientos() {
-      console.log("🔄 Invocando fetch a", API_URL);
+      console.log("🔄 Fetch→", API_URL);
       try {
         const res = await fetch(API_URL);
-        console.log("✅ Respuesta fetch status:", res.status);
+        console.log("✅ Status:", res.status);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const { data } = await res.json();
-        console.log("✅ JSON recibido:", data);
+        console.log("✅ Datos:", data);
 
-        // Limpiar tabla y marcadores
         tableBody.innerHTML = "";
         markerLayerGroup.clearLayers();
 
@@ -192,8 +199,44 @@
         }
 
         data.forEach(item => {
-          // Fila dinámica
           const tr = document.createElement("tr");
           tr.className = "bg-slate-700 hover:bg-slate-600";
           tr.innerHTML = `
-            <t
+            <td class="px-4 py-2">${new Date(item.date_time).toLocaleDateString()}</td>
+            <td class="px-4 py-2">${item.latitude}, ${item.longitude}</td>
+            <td class="px-4 py-2">Usuario</td>
+            <td class="px-4 py-2">
+              <span class="rounded px-2 py-1 text-xs ${
+                item.status === "verified" ? "bg-green-600" :
+                item.status === "pending"  ? "bg-yellow-500" :
+                                             "bg-red-600"
+              }">${item.status}</span>
+            </td>
+            <td class="px-4 py-2"><a href="#" class="text-blue-400 hover:underline">View</a></td>`;
+          tableBody.appendChild(tr);
+
+          if (item.latitude && item.longitude) {
+            const mk = L.marker([item.latitude, item.longitude])
+                         .bindPopup(`<b>${item.title}</b><br>${item.description}`);
+            markerLayerGroup.addLayer(mk);
+          }
+        });
+      } catch (err) {
+        console.error("❌ Error:", err);
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-2 text-red-400">
+              Error cargando datos.
+            </td>
+          </tr>`;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initMap();
+      cargarAvistamientos();
+      setInterval(cargarAvistamientos, 10000);
+    });
+  </script>
+</body>
+</html>
