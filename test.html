@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sightings — UAPON</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS -->
   <link rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -36,8 +38,7 @@
       <div class="bg-white rounded-xl shadow p-6 flex items-center space-x-4">
         <div class="p-3 bg-blue-100 rounded-full">
           <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9"/>
           </svg>
         </div>
         <div>
@@ -48,8 +49,7 @@
       <div class="bg-white rounded-xl shadow p-6 flex items-center space-x-4">
         <div class="p-3 bg-green-100 rounded-full">
           <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M5 13l4 4L19 7"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
           </svg>
         </div>
         <div>
@@ -60,8 +60,7 @@
       <div class="bg-white rounded-xl shadow p-6 flex items-center space-x-4">
         <div class="p-3 bg-yellow-100 rounded-full">
           <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4m0 0l3 3m-3-3l-3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 0l3 3"/>
           </svg>
         </div>
         <div>
@@ -74,18 +73,16 @@
     <!-- FILTERS -->
     <section class="bg-white rounded-xl shadow p-6">
       <form id="filter-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <input type="date" name="from" placeholder="From" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
-        <input type="date" name="to" placeholder="To" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
-        <input type="text" name="location" placeholder="Location" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
+        <input type="date" name="from" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
+        <input type="date" name="to"   class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
+        <input type="text" name="location_name" placeholder="Location Name" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
         <select name="status" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500">
           <option value="">All Status</option>
           <option value="pending">Pending</option>
           <option value="verified">Verified</option>
           <option value="rejected">Rejected</option>
         </select>
-        <button type="submit" class="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-500 transition">
-          Apply
-        </button>
+        <button type="submit" class="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-500 transition">Apply</button>
       </form>
     </section>
 
@@ -104,9 +101,7 @@
               <th class="px-4 py-2"></th>
             </tr>
           </thead>
-          <tbody id="sightings-table">
-            <!-- JS injecta aquí las filas -->
-          </tbody>
+          <tbody id="sightings-table"></tbody>
         </table>
       </div>
 
@@ -120,82 +115,75 @@
 
   </main>
 
-  <!-- LEAFLET & SCRIPT -->
+  <!-- SCRIPT: Leaflet + Directus Realtime -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script>
-    const API_URL = "https://uapon.directus.app/items/sightings";
-    const tableBody = document.getElementById("sightings-table");
-    const totalCard     = document.getElementById("total-count");
-    const verifiedCard  = document.getElementById("verified-count");
-    const pendingCard   = document.getElementById("pending-count");
+  <script type="module">
+    import { Directus } from 'https://cdn.jsdelivr.net/npm/@directus/sdk@9.7.0/dist/directus.esm.js';
+    const directus = new Directus('https://uapon.directus.app');
+
+    const API_URL = 'https://uapon.directus.app/items/sightings';
+    const tableBody     = document.getElementById('sightings-table');
+    const totalCard     = document.getElementById('total-count');
+    const verifiedCard  = document.getElementById('verified-count');
+    const pendingCard   = document.getElementById('pending-count');
     let map, markers = [];
 
+    // Inicializar mapa
     function initMap() {
-      map = L.map("map").setView([4.6939, -74.0696], 4);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "© OpenStreetMap"
-      }).addTo(map);
+      map = L.map('map').setView([4.6939, -74.0696], 4);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     }
 
+    // Carga de datos
     async function loadSightings(params = {}) {
       try {
         const url = new URL(API_URL);
         Object.entries(params).forEach(([k,v]) => v && url.searchParams.set(k, v));
-        url.searchParams.set("fields", "id,title,description,date_time,latitude,longitude,status");
+        url.searchParams.set('fields', 'id,title,description,date_time,location_name,latitude,longitude,status');
+
         const res = await fetch(url, { mode: 'cors' });
         if (!res.ok) throw new Error(res.status);
         const { data } = await res.json();
 
         // Estadísticas
         totalCard.textContent    = data.length;
-        verifiedCard.textContent = data.filter(i=>i.status==="verified").length;
-        pendingCard.textContent  = data.filter(i=>i.status==="pending").length;
+        verifiedCard.textContent = data.filter(i=>i.status==='verified').length;
+        pendingCard.textContent  = data.filter(i=>i.status==='pending').length;
 
-        // Limpiar
-        tableBody.innerHTML = "";
+        // Limpiar tabla y marcadores
+        tableBody.innerHTML = '';
         markers.forEach(m=>map.removeLayer(m));
         markers = [];
 
         data.forEach(item => {
-          // Prepara location y evita llamar a toFixed si es null
-          const lat = item.latitude, lng = item.longitude;
-          const loc = (lat != null && lng != null)
-            ? `${lat.toFixed(4)}, ${lng.toFixed(4)}`
-            : 'N/A';
-
-          // Fila de tabla
-          const tr = document.createElement("tr");
-          tr.className = "border-b hover:bg-gray-50";
+          const loc = item.location_name || 'N/A';
+          const tr = document.createElement('tr');
+          tr.className = 'border-b hover:bg-gray-50';
           tr.innerHTML = `
             <td class="px-4 py-2">${item.title}</td>
             <td class="px-4 py-2">${new Date(item.date_time).toLocaleDateString()}</td>
             <td class="px-4 py-2">${loc}</td>
             <td class="px-4 py-2">
-              <span class="inline-block text-xs font-medium py-1 px-2 rounded-full
-                ${item.status==="verified"?"bg-green-100 text-green-800":
-                  item.status==="pending"?"bg-yellow-100 text-yellow-800":
-                  "bg-red-100 text-red-800"}">
-                ${item.status}
-              </span>
+              <span class="inline-block text-xs font-medium py-1 px-2 rounded-full \${
+                item.status==='verified'?'bg-green-100 text-green-800':
+                item.status==='pending'?'bg-yellow-100 text-yellow-800':'bg-red-100 text-red-800'
+              }">${item.status}</span>
             </td>
             <td class="px-4 py-2 text-right">
-              <a href="/sighting.html?id=${item.id}" target="_blank"
-                 class="text-blue-600 hover:underline">View</a>
+              <a href="/sighting.html?id=${item.id}" target="_blank" class="text-blue-600 hover:underline">View</a>
             </td>`;
           tableBody.appendChild(tr);
 
-          // Marcador en mapa solo si lat/lng válidos
-          if (lat != null && lng != null) {
-            const m = L.marker([lat, lng])
-                    .addTo(map)
-                    .bindPopup(`<strong>${item.title}</strong><br>${item.description}`);
+          // Agregar marcador si hay coordenadas
+          if (item.latitude != null && item.longitude != null) {
+            const m = L.marker([item.latitude, item.longitude])
+              .addTo(map)
+              .bindPopup(`<strong>${item.title}</strong><br>${loc}`);
             markers.push(m);
           }
         });
-
       } catch (err) {
-        console.error("Error cargando avistamientos:", err);
+        console.error('Error cargando avistamientos:', err);
         tableBody.innerHTML = `
           <tr><td colspan="5" class="px-4 py-6 text-center text-red-600">
             No se pudieron cargar los avistamientos.
@@ -203,21 +191,24 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    // Arrancar
+    document.addEventListener('DOMContentLoaded', () => {
       initMap();
       loadSightings();
-      setInterval(() => loadSightings(), 10000);
-      document.getElementById("filter-form")
-        .addEventListener("submit", e => {
-          e.preventDefault();
-          const form = e.target;
-          loadSightings({
-            from:     form.from.value,
-            to:       form.to.value,
-            location: form.location.value,
-            status:   form.status.value
-          });
+      // Suscripción realtime
+      directus.items('sightings').subscribe('*', () => loadSightings());
+
+      // Filtros
+      document.getElementById('filter-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const f = e.target;
+        loadSightings({
+          from: f.from.value,
+          to: f.to.value,
+          location_name: f.location_name.value,
+          status: f.status.value
         });
+      });
     });
   </script>
 
