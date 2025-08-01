@@ -1,124 +1,253 @@
-<!-- Sightings List & Map Responsive Section -->
-<section class="container mx-auto py-12 px-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-  
-  <!-- Sightings List -->
-  <div class="space-y-4">
-    <h2 class="text-2xl font-semibold mb-2">Sightings List</h2>
-    <div class="overflow-x-auto">
-      <table class="min-w-full table-auto text-left border border-slate-700">
-        <thead class="bg-slate-800 sticky top-0">
-          <tr>
-            <th class="px-4 py-2">Title</th>
-            <th class="px-4 py-2">Description</th>
-            <th class="px-4 py-2">Date</th>
-            <th class="px-4 py-2">Location</th>
-            <th class="px-4 py-2">Status</th>
-            <th class="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="sightings-table" class="divide-y divide-slate-700">
-          <tr>
-            <td colspan="6" class="px-4 py-4 text-center text-slate-400">
-              Cargando avistamientos…
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sightings — UAPON</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+</head>
+<body class="bg-slate-900 text-slate-100">
+
+  <!-- Header -->
+  <header class="bg-slate-800 relative">
+    <div class="container mx-auto flex items-center justify-between px-6 py-4">
+      <a href="index.html" class="flex items-center space-x-2">
+        <div class="h-8 w-8 bg-slate-600 rounded"></div>
+        <span class="text-2xl font-semibold text-white">UAPON</span>
+      </a>
+      <button id="nav-toggle" class="block md:hidden text-slate-100 focus:outline-none">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <nav class="hidden md:flex md:items-center md:space-x-6">
+        <a href="/" class="text-white hover:text-blue-400">Home</a>
+        <a href="/sightings/" class="text-white hover:text-blue-400">Sightings</a>
+        <a href="/statistics/" class="text-white hover:text-blue-400">Statistics</a>
+        <a href="/community/" class="text-white hover:text-blue-400">Community</a>
+        <a href="/contact/" class="text-white hover:text-blue-400">Contact</a>
+        <a href="/report/" class="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-500">
+          Report Sighting
+        </a>
+      </nav>
     </div>
-  </div>
+    <nav id="nav-menu" class="hidden absolute top-full left-0 w-full bg-slate-800 shadow-lg border-t border-slate-700 z-50 md:hidden">
+      <div class="flex flex-col px-6 py-4">
+        <a href="/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700">Home</a>
+        <a href="/sightings/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700">Sightings</a>
+        <a href="/statistics/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700">Statistics</a>
+        <a href="/community/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700">Community</a>
+        <a href="/contact/" class="block text-white hover:text-blue-400 py-3 border-b border-slate-700">Contact</a>
+        <a href="/report/" class="block bg-blue-600 text-white rounded px-4 py-3 mt-4 text-center hover:bg-blue-500">
+          Report Sighting
+        </a>
+      </div>
+    </nav>
+  </header>
 
-  <!-- Sightings Map -->
-  <div class="space-y-4">
-    <h2 class="text-2xl font-semibold mb-2">Sightings Map</h2>
-    <div id="map" class="w-full h-80 rounded-lg bg-slate-700"></div>
-  </div>
+  <!-- Hero -->
+  <section class="relative bg-[url('starry-bg.jpg')] bg-cover bg-center py-20">
+    <div class="container mx-auto text-center px-6">
+      <h1 class="text-4xl sm:text-5xl font-bold mb-4">All UAP Sightings</h1>
+      <p class="text-lg sm:text-xl text-slate-300 mb-8">
+        Browse, filter and explore every submitted UAP report from our community.
+      </p>
+    </div>
+  </section>
 
-</section>
+  <!-- Filters & Summary -->
+  <section class="container mx-auto py-12 px-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <form class="flex flex-wrap gap-4">
+        <input type="date" name="from" class="rounded bg-slate-700 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <input type="date" name="to"   class="rounded bg-slate-700 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <input type="text" name="location" placeholder="Location"
+          class="rounded bg-slate-700 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <select name="status" class="rounded bg-slate-700 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+          <option value="">Any Status</option>
+          <option value="pending">Pending</option>
+          <option value="verified">Verified</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button type="submit" class="rounded bg-blue-600 px-4 py-2 font-semibold hover:bg-blue-500">
+          Apply Filters
+        </button>
+      </form>
+      <div class="flex space-x-8 text-center">
+        <div>
+          <p id="count-total"    class="text-3xl font-bold">0</p>
+          <p class="text-slate-400 text-sm">Total Reports</p>
+        </div>
+        <div>
+          <p id="count-verified" class="text-3xl font-bold">0</p>
+          <p class="text-slate-400 text-sm">Verified</p>
+        </div>
+        <div>
+          <p id="count-pending"  class="text-3xl font-bold">0</p>
+          <p class="text-slate-400 text-sm">Pending</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- Leaflet + Script -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script>
-  const API_URL = 
-    "https://uapon.directus.app/items/sightings?" +
-    "fields=id,title,description,date_time,latitude,longitude,status";
+  <!-- Sightings List & Map Responsive Section -->
+  <section class="container mx-auto py-12 px-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- Sightings List -->
+    <div>
+      <h2 class="text-2xl font-semibold mb-4">Sightings List</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto text-left border border-slate-700">
+          <thead class="bg-slate-800 sticky top-0">
+            <tr>
+              <th class="px-4 py-2">Title</th>
+              <th class="px-4 py-2">Description</th>
+              <th class="px-4 py-2">Date</th>
+              <th class="px-4 py-2">Location</th>
+              <th class="px-4 py-2">Status</th>
+              <th class="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sightings-table" class="divide-y divide-slate-700">
+            <tr>
+              <td colspan="6" class="px-4 py-4 text-center text-slate-400">
+                Cargando avistamientos…
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-  let map, markersLayer;
+    <!-- Sightings Map -->
+    <div>
+      <h2 class="text-2xl font-semibold mb-4">Sightings Map</h2>
+      <div id="map" class="w-full h-80 rounded-lg bg-slate-700"></div>
+    </div>
 
-  function initMap() {
-    map = L.map("map").setView([4.6939, -74.0696], 5);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "© OpenStreetMap",
-    }).addTo(map);
-    markersLayer = L.layerGroup().addTo(map);
-  }
+  </section>
 
-  async function reloadSightings() {
-    try {
-      const res = await fetch(API_URL);
-      const { data } = await res.json();
-      
-      // clear table & markers
-      const tbody = document.getElementById("sightings-table");
-      tbody.innerHTML = "";
-      markersLayer.clearLayers();
+  <!-- Footer -->
+  <footer class="bg-slate-900 py-8 px-6">
+    <div class="container mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+      <div>
+        <h4 class="font-semibold mb-2">UAPON</h4>
+        <p>Community network for observing unidentified aerial phenomena.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Links</h4>
+        <ul class="space-y-1">
+          <li><a href="index.html"   class="hover:text-white">Home</a></li>
+          <li><a href="community.html" class="hover:text-white">Community</a></li>
+          <li><a href="report.html"  class="hover:text-white">Report</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Contact</h4>
+        <p>support@uapon.com</p>
+      </div>
+    </div>
+    <p class="mt-8 text-center text-slate-600 text-sm">&copy; 2025 UAPON. All rights reserved.</p>
+  </footer>
 
-      if (!data.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="px-4 py-4 text-center text-slate-400">
-              Sin avistamientos.
-            </td>
-          </tr>`;
-        return;
-      }
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <!-- Integration & Polling Script -->
+  <script>
+    const API_URL =
+      "https://uapon.directus.app/items/sightings?" +
+      "fields=id,title,description,date_time,latitude,longitude,status";
 
-      // build table rows & markers
-      data.forEach(item => {
-        // table row
-        const tr = document.createElement("tr");
-        tr.className = "bg-slate-700 hover:bg-slate-600";
-        tr.innerHTML = `
-          <td class="px-4 py-2">${item.title}</td>
-          <td class="px-4 py-2 truncate max-w-xs">${item.description}</td>
-          <td class="px-4 py-2">${new Date(item.date_time).toLocaleDateString()}</td>
-          <td class="px-4 py-2">${item.latitude}, ${item.longitude}</td>
-          <td class="px-4 py-2">
-            <span class="rounded px-2 py-1 text-xs ${
-              item.status === "verified" ? "bg-green-600" :
-              item.status === "pending"  ? "bg-yellow-500" :
-                                           "bg-red-600"
-            }">${item.status}</span>
-          </td>
-          <td class="px-4 py-2">
-            <a 
-              href="sighting.html?id=${item.id}" 
-              class="text-blue-400 hover:underline"
-            >View</a>
-          </td>`;
-        tbody.appendChild(tr);
+    let map, markersLayer;
 
-        // map marker
-        if (item.latitude && item.longitude) {
-          const mk = L.marker([item.latitude, item.longitude])
-            .bindPopup(`<strong>${item.title}</strong><br>${item.description}`);
-          markersLayer.addLayer(mk);
-        }
-      });
-
-      // fit map to markers
-      const bounds = markersLayer.getBounds();
-      if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
-
-    } catch (err) {
-      console.error("Error cargando avistamientos:", err);
+    function initMap() {
+      map = L.map("map").setView([4.6939, -74.0696], 5);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap",
+      }).addTo(map);
+      markersLayer = L.layerGroup().addTo(map);
     }
-  }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    initMap();
-    reloadSightings();
-    // refrescar cada 30 segundos
-    setInterval(reloadSightings, 30000);
-  });
-</script>
+    async function reloadSightings() {
+      try {
+        const res = await fetch(API_URL);
+        const { data } = await res.json();
+
+        // actualizar contadores
+        document.getElementById("count-total"   ).textContent = data.length;
+        document.getElementById("count-verified").textContent =
+          data.filter(i => i.status === "verified").length;
+        document.getElementById("count-pending" ).textContent =
+          data.filter(i => i.status === "pending").length;
+
+        // tabla
+        const tbody = document.getElementById("sightings-table");
+        tbody.innerHTML = "";
+        markersLayer.clearLayers();
+
+        if (!data.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="px-4 py-4 text-center text-slate-400">
+                Sin avistamientos.
+              </td>
+            </tr>`;
+          return;
+        }
+
+        data.forEach(item => {
+          // fila
+          const tr = document.createElement("tr");
+          tr.className = "bg-slate-700 hover:bg-slate-600";
+          tr.innerHTML = `
+            <td class="px-4 py-2">${item.title}</td>
+            <td class="px-4 py-2 truncate max-w-xs">${item.description}</td>
+            <td class="px-4 py-2">${new Date(item.date_time).toLocaleDateString()}</td>
+            <td class="px-4 py-2">${item.latitude}, ${item.longitude}</td>
+            <td class="px-4 py-2">
+              <span class="rounded px-2 py-1 text-xs ${
+                item.status === "verified" ? "bg-green-600" :
+                item.status === "pending"  ? "bg-yellow-500" :
+                                             "bg-red-600"
+              }">${item.status}</span>
+            </td>
+            <td class="px-4 py-2">
+              <a href="sighting.html?id=${item.id}" class="text-blue-400 hover:underline">View</a>
+            </td>`;
+          tbody.appendChild(tr);
+
+          // marcador
+          if (item.latitude && item.longitude) {
+            const mk = L.marker([item.latitude, item.longitude])
+              .bindPopup(`<strong>${item.title}</strong><br>${item.description}`);
+            markersLayer.addLayer(mk);
+          }
+        });
+
+        // ajustar vista
+        const bounds = markersLayer.getBounds();
+        if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+      } catch (err) {
+        console.error("Error cargando avistamientos:", err);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initMap();
+      reloadSightings();
+      setInterval(reloadSightings, 30000);
+    });
+  </script>
+
+</body>
+</html>
