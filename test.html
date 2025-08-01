@@ -3,258 +3,99 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sightings — UAPON</title>
-
-  <!-- Fuente Poppins + Tailwind -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Poppins', 'sans-serif'] },
-          colors: {
-            primary: '#3b82f6',
-            card: '#1e293b',
-            'card-hover': '#334155'
-          }
-        }
-      }
-    }
-  </script>
+  <title>Detalle del Avistamiento — UAPON</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin="" />
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
-<body class="bg-slate-900 font-sans text-slate-100">
+<body class="bg-slate-900 text-slate-100">
 
-  <!-- Header (sticky) -->
-  <header class="bg-slate-800 shadow-md sticky top-0 z-50">
-    <div class="container mx-auto flex items-center justify-between px-6 py-4">
-      <a href="/" class="flex items-center space-x-2">
-        <div class="h-8 w-8 bg-slate-600 rounded"></div>
-        <span class="text-2xl font-bold">UAPON</span>
-      </a>
-      <nav class="hidden md:flex space-x-6">
-        <a href="/"           class="hover:text-primary transition">Home</a>
-        <a href="/sightings/" class="hover:text-primary transition font-semibold">Sightings</a>
-        <a href="/statistics/"class="hover:text-primary transition">Statistics</a>
-        <a href="/community/" class="hover:text-primary transition">Community</a>
-        <a href="/contact/"   class="hover:text-primary transition">Contact</a>
-      </nav>
-      <a href="/report/"
-         class="hidden md:inline-block bg-primary text-white px-4 py-2 rounded hover:bg-blue-500 transition">
-        Report Sighting
-      </a>
-      <button id="nav-toggle"
-              class="md:hidden text-2xl hover:text-primary transition focus:outline-none">☰</button>
+  <!-- Aquí copias tu header idéntico al de test.html -->
+
+  <main class="container mx-auto px-6 py-12">
+    <div id="loading" class="text-center text-slate-400">Cargando detalle…</div>
+    <div id="detail" class="hidden space-y-4">
+      <h1 id="title" class="text-3xl font-bold"></h1>
+      <p id="description" class="text-lg"></p>
+      <ul class="space-y-2">
+        <li><strong>Fecha:</strong> <span id="date"></span></li>
+        <li><strong>Ubicación:</strong> <span id="loc"></span></li>
+        <li><strong>Estado:</strong> <span id="status" class="px-2 py-1 rounded text-xs"></span></li>
+        <li><strong>Registrado por:</strong> <span id="uploader"></span></li>
+      </ul>
+      <div id="map" class="h-80 rounded-lg bg-slate-700"></div>
     </div>
-    <!-- mobile menu -->
-    <nav id="nav-menu" class="hidden bg-slate-800 border-t border-slate-700">
-      <a href="/"           class="block px-6 py-3 hover:bg-card-hover">Home</a>
-      <a href="/sightings/" class="block px-6 py-3 hover:bg-card-hover">Sightings</a>
-      <a href="/statistics/"class="block px-6 py-3 hover:bg-card-hover">Statistics</a>
-      <a href="/community/" class="block px-6 py-3 hover:bg-card-hover">Community</a>
-      <a href="/contact/"   class="block px-6 py-3 hover:bg-card-hover">Contact</a>
-      <a href="/report/"
-         class="block mx-6 my-2 text-center bg-primary text-white px-4 py-2 rounded hover:bg-blue-500">
-        Report Sighting
-      </a>
-    </nav>
-  </header>
+  </main>
 
-  <!-- Hero -->
-  <section class="bg-[url('starry-bg.jpg')] bg-cover bg-center py-20">
-    <div class="container mx-auto text-center px-6">
-      <h1 class="text-5xl font-bold mb-4">All UAP Sightings</h1>
-      <p class="text-lg text-slate-300">Browse, filter and explore every submitted UAP report from our community.</p>
-    </div>
-  </section>
+  <!-- Copia tu footer también -->
 
-  <!-- Filters & Summary Cards -->
-  <section class="container mx-auto py-12 px-6 space-y-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-      <!-- FILTERS CARD -->
-      <div class="bg-card rounded-lg p-6 shadow-md">
-        <h2 class="font-semibold mb-4">Filters</h2>
-        <form class="space-y-4">
-          <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-            <input type="date" name="from"
-                   class="flex-1 bg-slate-700 rounded px-4 py-2 focus:ring-primary"/>
-            <input type="date" name="to"
-                   class="flex-1 bg-slate-700 rounded px-4 py-2 focus:ring-primary"/>
-          </div>
-          <input type="text" name="location" placeholder="Location"
-                 class="w-full bg-slate-700 rounded px-4 py-2 focus:ring-primary"/>
-          <select name="status" class="w-full bg-slate-700 rounded px-4 py-2 focus:ring-primary">
-            <option value="">Any Status</option>
-            <option value="pending">Pending</option>
-            <option value="verified">Verified</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <button type="submit"
-                  class="w-full bg-primary text-white rounded py-2 font-semibold hover:bg-blue-500 transition">
-            Apply Filters
-          </button>
-        </form>
-      </div>
-
-      <!-- METRICS CARDS -->
-      <div class="grid grid-cols-3 gap-4 lg:col-span-2">
-        <div class="bg-card rounded-lg p-6 shadow-md text-center">
-          <p id="count-total"    class="text-3xl font-bold">0</p>
-          <p class="text-slate-400">Total Reports</p>
-        </div>
-        <div class="bg-card rounded-lg p-6 shadow-md text-center">
-          <p id="count-verified" class="text-3xl font-bold">0</p>
-          <p class="text-slate-400">Verified</p>
-        </div>
-        <div class="bg-card rounded-lg p-6 shadow-md text-center">
-          <p id="count-pending"  class="text-3xl font-bold">0</p>
-          <p class="text-slate-400">Pending</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- List & Map Section -->
-  <section class="container mx-auto py-12 px-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-    <!-- LIST CARD -->
-    <div class="bg-card rounded-lg shadow-md overflow-hidden">
-      <h2 class="p-6 font-semibold text-xl border-b border-slate-700">Sightings List</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-left">
-          <thead class="bg-slate-800">
-            <tr>
-              <th class="px-4 py-3">Title</th>
-              <th class="px-4 py-3">Date</th>
-              <th class="px-4 py-3">Location</th>
-              <th class="px-4 py-3">Status</th>
-              <th class="px-4 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="sightings-table" class="divide-y divide-slate-700">
-            <tr>
-              <td colspan="5" class="px-4 py-6 text-center text-slate-400">
-                Cargando avistamientos…
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- MAP CARD -->
-    <div class="bg-card rounded-lg shadow-md">
-      <h2 class="p-6 font-semibold text-xl border-b border-slate-700">Sightings Map</h2>
-      <div id="map" class="w-full h-80"></div>
-    </div>
-
-  </section>
-
-  <!-- Footer -->
-  <footer class="bg-slate-900 py-8 px-6">
-    <div class="container mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
-      <div>
-        <h4 class="font-semibold mb-2">UAPON</h4>
-        <p>Community network for observing unidentified aerial phenomena.</p>
-      </div>
-      <div>
-        <h4 class="font-semibold mb-2">Links</h4>
-        <ul class="space-y-1">
-          <li><a href="/"           class="hover:text-white">Home</a></li>
-          <li><a href="/community/" class="hover:text-white">Community</a></li>
-          <li><a href="/report/"    class="hover:text-white">Report</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="font-semibold mb-2">Contact</h4>
-        <p>support@uapon.com</p>
-      </div>
-    </div>
-    <p class="mt-8 text-center text-slate-600 text-sm">&copy; 2025 UAPON. All rights reserved.</p>
-  </footer>
-
-  <!-- Leaflet JS & Integration Script -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // toggle mobile menu
-    document.getElementById('nav-toggle')
-      .addEventListener('click', () => document.getElementById('nav-menu')
-      .classList.toggle('hidden'));
+    // 1) Extraer el id de la URL
+    const params = new URLSearchParams(window.location.search);
+    const sightingId = params.get("id");
 
-    // API & map init
-    const API_URL = 'https://uapon.directus.app/items/sightings?fields=id,title,date_time,latitude,longitude,status';
-    let map, layer;
-
-    function initMap() {
-      map = L.map('map').setView([4.6939, -74.0696], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19, attribution: '© OpenStreetMap'
-      }).addTo(map);
-      layer = L.layerGroup().addTo(map);
+    if (!sightingId) {
+      document.getElementById("loading").textContent = "ID de avistamiento no proporcionado.";
+      throw new Error("No ID");
     }
 
-    async function reload() {
-      const res = await fetch(API_URL);
-      const { data } = await res.json();
-      // update counts
-      document.getElementById('count-total'   ).textContent = data.length;
-      document.getElementById('count-verified').textContent =
-        data.filter(i=>i.status==='verified').length;
-      document.getElementById('count-pending' ).textContent =
-        data.filter(i=>i.status==='pending').length;
+    // 2) Petición a la API para un solo ítem
+    const API_URL = `https://uapon.directus.app/items/sightings/${sightingId}?` +
+      "fields=title,description,date_time,latitude,longitude,status," +
+      "created_by.first_name,created_by.last_name";
 
-      // fill table & markers
-      const tbody = document.getElementById('sightings-table');
-      tbody.innerHTML = '';
-      layer.clearLayers();
-      if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-400">
-          Sin avistamientos.
-        </td></tr>`;
-        return;
+    async function cargarDetalle() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { data: item } = await res.json();
+
+        // 3) Rellenar los elementos
+        document.getElementById("title").textContent       = item.title;
+        document.getElementById("description").textContent = item.description;
+        document.getElementById("date").textContent        =
+          new Date(item.date_time).toLocaleString("es-CO", {
+            day: "numeric", month: "short", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+          });
+        document.getElementById("loc").textContent         =
+          `${item.latitude}, ${item.longitude}`;
+        const statusEl = document.getElementById("status");
+        statusEl.textContent = item.status;
+        // ajustar color según estado
+        statusEl.classList.add(
+          item.status === "verified" ? "bg-green-600" :
+          item.status === "pending"  ? "bg-yellow-500" :
+                                       "bg-red-600"
+        );
+        const uploaderName = item.created_by
+          ? `${item.created_by.first_name} ${item.created_by.last_name}`
+          : "Usuario";
+        document.getElementById("uploader").textContent = uploaderName;
+
+        // 4) Mostrar sección y ocultar “loading”
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("detail").classList.remove("hidden");
+
+        // 5) Iniciar mapa y marcador
+        const map = L.map("map").setView([item.latitude, item.longitude], 6);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19, attribution: "© OpenStreetMap"
+        }).addTo(map);
+        L.marker([item.latitude, item.longitude])
+          .addTo(map)
+          .bindPopup(`<b>${item.title}</b><br>${item.description}`)
+          .openPopup();
+
+      } catch(err) {
+        document.getElementById("loading").textContent =
+          "Error cargando detalle: " + err.message;
+        console.error(err);
       }
-      data.forEach(item=>{
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-card-hover';
-        tr.innerHTML = `
-          <td class="px-4 py-3">${item.title}</td>
-          <td class="px-4 py-3">${new Date(item.date_time).toLocaleDateString()}</td>
-          <td class="px-4 py-3">${item.latitude}, ${item.longitude}</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-1 rounded text-xs ${
-              item.status==='verified' ? 'bg-green-600' :
-              item.status==='pending'  ? 'bg-yellow-500' :
-                                         'bg-red-600'
-            }">${item.status}</span>
-          </td>
-          <td class="px-4 py-3">
-            <a href="sighting.html?id=${item.id}" class="text-primary hover:underline">View</a>
-          </td>`;
-        tbody.appendChild(tr);
-
-        if (item.latitude && item.longitude) {
-          L.marker([item.latitude,item.longitude])
-           .bindPopup(`<strong>${item.title}</strong><br>${new Date(item.date_time).toLocaleDateString()}`)
-           .addTo(layer);
-        }
-      });
-
-      // fit bounds
-      const b = layer.getBounds();
-      if (b.isValid()) map.fitBounds(b, { padding:[20,20] });
     }
 
-    document.addEventListener('DOMContentLoaded', ()=>{
-      initMap(); reload();
-      setInterval(reload, 30000);
-    });
+    document.addEventListener("DOMContentLoaded", cargarDetalle);
   </script>
 </body>
 </html>
