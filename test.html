@@ -1,203 +1,225 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UAPON SaaS Dashboard</title>
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
-  <!-- Tailwind CSS with Extended Theme -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] },
-          colors: {
-            primary: '#4F46E5',
-            secondary: '#10B981',
-            muted: '#6B7280',
-            bg: '#F9FAFB',
-            card: '#FFFFFF',
-            sidebar: '#3730A3'
-          }
-        }
-      }
-    }
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sightings — UAPON</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Heroicons for icons -->
-  <script src="https://unpkg.com/feather-icons"></script>
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
 </head>
+<body class="bg-gray-100 text-gray-800">
 
-<body class="font-sans bg-bg text-gray-800 flex h-screen overflow-hidden">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-sidebar text-white flex flex-col">
-    <div class="h-16 flex items-center justify-center text-2xl font-bold border-b border-sidebar/50">
-      UAPON
+  <!-- HEADER -->
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <h1 class="text-3xl font-bold">Sightings</h1>
+      <div class="relative w-full sm:w-64">
+        <input type="text" placeholder="Search…" 
+               class="w-full pl-10 pr-4 py-2 border rounded-lg 
+                      focus:outline-none focus:ring-2 focus:ring-blue-500 
+                      bg-gray-50"/>
+        <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+        </svg>
+      </div>
     </div>
-    <nav class="flex-1 px-4 py-6 space-y-4">
-      <a href="#" class="flex items-center p-2 rounded hover:bg-sidebar/70 transition">
-        <i data-feather="home" class="w-5 h-5 mr-3"></i> Dashboard
-      </a>
-      <a href="#" class="flex items-center p-2 rounded bg-sidebar/70">
-        <i data-feather="map-pin" class="w-5 h-5 mr-3"></i> Sightings
-      </a>
-      <a href="#" class="flex items-center p-2 rounded hover:bg-sidebar/70 transition">
-        <i data-feather="users" class="w-5 h-5 mr-3"></i> Community
-      </a>
-      <a href="#" class="flex items-center p-2 rounded hover:bg-sidebar/70 transition">
-        <i data-feather="settings" class="w-5 h-5 mr-3"></i> Settings
-      </a>
-    </nav>
-    <div class="p-4 border-t border-sidebar/50">
-      <button class="w-full flex items-center justify-center bg-secondary px-4 py-2 rounded hover:bg-secondary/90 transition">
-        <i data-feather="plus" class="w-4 h-4 mr-2"></i> New Report
-      </button>
-    </div>
-  </aside>
+  </header>
 
-  <!-- Main content -->
-  <div class="flex-1 flex flex-col overflow-auto">
-    <!-- Top Navbar -->
-    <header class="h-16 bg-white flex items-center justify-between px-6 shadow">
-      <div class="flex items-center space-x-4">
-        <button id="menu-toggle" class="md:hidden text-xl text-gray-600"><i data-feather="menu"></i></button>
-        <h1 class="text-2xl font-semibold">Sightings</h1>
-      </div>
-      <div class="flex items-center space-x-6">
-        <div class="relative">
-          <input type="text" id="search" placeholder="Search..."
-            class="pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary" />
-          <div class="absolute top-2 left-3 text-muted"><i data-feather="search"></i></div>
-        </div>
-        <img src="https://i.pravatar.cc/40" alt="User" class="w-8 h-8 rounded-full" />
-      </div>
-    </header>
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
 
-    <!-- Content Area -->
-    <main class="flex-1 p-6 bg-bg space-y-6">
-      <!-- Metrics -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div class="bg-card p-6 rounded-lg shadow flex items-center">
-          <i data-feather="clock" class="w-6 h-6 text-primary mr-4"></i>
-          <div>
-            <p id="count-total" class="text-3xl font-semibold">0</p>
-            <p class="text-muted">Total Sightings</p>
-          </div>
+    <!-- METRIC CARDS -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="bg-white rounded-xl shadow p-6 flex items-center space-x-4">
+        <div class="p-3 bg-blue-100 rounded-full">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
         </div>
-        <div class="bg-card p-6 rounded-lg shadow flex items-center">
-          <i data-feather="check-circle" class="w-6 h-6 text-secondary mr-4"></i>
-          <div>
-            <p id="count-verified" class="text-3xl font-semibold">0</p>
-            <p class="text-muted">Verified</p>
-          </div>
-        </div>
-        <div class="bg-card p-6 rounded-lg shadow flex items-center">
-          <i data-feather="clock" class="w-6 h-6 text-warning mr-4"></i>
-          <div>
-            <p id="count-pending" class="text-3xl font-semibold">0</p>
-            <p class="text-muted">Pending</p>
-          </div>
+        <div>
+          <p id="total-count" class="text-2xl font-semibold">0</p>
+          <p class="text-gray-500">Total Sightings</p>
         </div>
       </div>
+      <div class="bg-white rounded-xl shadow p-6 flex items-center space-x-4">
+        <div class="p-3 bg-green-100 rounded-full">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div>
+          <p id="verified-count" class="text-2xl font-semibold">0</p>
+          <p class="text-gray-500">Verified</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 flex items-center space-x-4">
+        <div class="p-3 bg-yellow-100 rounded-full">
+          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4m0 0l3 3m-3-3l-3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p id="pending-count" class="text-2xl font-semibold">0</p>
+          <p class="text-gray-500">Pending</p>
+        </div>
+      </div>
+    </section>
 
-      <!-- Filters -->
-      <div class="bg-card p-6 rounded-lg shadow">
-        <h2 class="text-lg font-semibold mb-4">Filter Sightings</h2>
-        <form id="filters" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input type="date" name="from" class="p-2 border rounded focus:ring-2 focus:ring-primary" placeholder="From" />
-          <input type="date" name="to"   class="p-2 border rounded focus:ring-2 focus:ring-primary" placeholder="To" />
-          <input type="text" name="location_name" class="p-2 border rounded focus:ring-2 focus:ring-primary" placeholder="Location" />
-          <select name="status" class="p-2 border rounded focus:ring-2 focus:ring-primary">
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="verified">Verified</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <button type="submit" class="md:col-span-2 bg-primary text-white rounded p-2 font-medium hover:bg-primary/90 transition">
-            Apply Filters
-          </button>
-        </form>
+    <!-- FILTERS -->
+    <section class="bg-white rounded-xl shadow p-6">
+      <form id="filter-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <input type="date" name="from" placeholder="From" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
+        <input type="date" name="to" placeholder="To" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
+        <input type="text" name="location" placeholder="Location" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500"/>
+        <select name="status" class="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="verified">Verified</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button type="submit" class="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-500 transition">
+          Apply
+        </button>
+      </form>
+    </section>
+
+    <!-- RESULTS: TABLE + MAP -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- TABLE -->
+      <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+        <table class="min-w-full table-auto">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-gray-600">Title</th>
+              <th class="px-4 py-2 text-left text-gray-600">Date</th>
+              <th class="px-4 py-2 text-left text-gray-600">Location</th>
+              <th class="px-4 py-2 text-left text-gray-600">Status</th>
+              <th class="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody id="sightings-table">
+            <!-- JS injecta aquí las filas -->
+          </tbody>
+        </table>
       </div>
 
-      <!-- Cards Grid -->
-      <div id="cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      <!-- MAP -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Sightings Map</h2>
+        <div id="map" class="h-80 w-full rounded-lg"></div>
+      </div>
 
-    </main>
-  </div>
+    </section>
 
-  <!-- Leaflet JS & Integration Script -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </main>
+
+  <!-- LEAFLET & SCRIPT -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
-    feather.replace();
-
-    const API_URL = 'https://uapon.directus.app/items/sightings?fields=id,title,description,date_time,location_name,latitude,longitude,status';
-    let map, markers;
-    const cardsContainer = document.getElementById('cards');
+    const API_URL = "https://uapon.directus.app/items/sightings";
+    const tableBody = document.getElementById("sightings-table");
+    const totalCard     = document.getElementById("total-count");
+    const verifiedCard  = document.getElementById("verified-count");
+    const pendingCard   = document.getElementById("pending-count");
+    let map, markers = [];
 
     function initMap() {
-      map = L.map(document.createElement('div')).setView([4.6939, -74.0696], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-      markers = L.layerGroup().addTo(map);
+      map = L.map("map").setView([4.6939, -74.0696], 4);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap"
+      }).addTo(map);
     }
 
-    function createCard(item) {
-      const card = document.createElement('div');
-      card.className = 'bg-card p-6 rounded-lg shadow flex flex-col justify-between';
-      card.innerHTML = `
-        <div>
-          <h3 class="text-xl font-semibold mb-2 truncate">${item.title}</h3>
-          <p class="text-muted mb-4 line-clamp-3">${item.description}</p>
-        </div>
-        <div class="text-sm text-muted mb-2">${new Date(item.date_time).toLocaleDateString()}</div>
-        <div class="flex items-center justify-between">
-          <span class="px-2 py-1 text-xs rounded ${item.status==='verified'?'bg-secondary text-white':item.status==='pending'?'bg-warning text-white':'bg-danger text-white'}">${item.status}</span>
-          <a href="sighting.html?id=${item.id}" class="text-primary hover:underline text-sm">Details →</a>
-        </div>
-      `;
-      return card;
+    async function loadSightings(params = {}) {
+      try {
+        // Construir URL con filtros
+        const url = new URL(API_URL);
+        Object.entries(params).forEach(([k,v]) => v && url.searchParams.set(k, v));
+        // Campos que queremos traer
+        url.searchParams.set("fields", "title,description,date_time,latitude,longitude,status");
+        const res = await fetch(url, { mode: 'cors' });
+        if (!res.ok) throw new Error(res.status);
+        const { data } = await res.json();
+
+        // Estadísticas
+        totalCard.textContent    = data.length;
+        verifiedCard.textContent = data.filter(i=>i.status==="verified").length;
+        pendingCard.textContent  = data.filter(i=>i.status==="pending").length;
+
+        // Limpiar tabla y marcadores
+        tableBody.innerHTML = "";
+        markers.forEach(m=>map.removeLayer(m));
+        markers = [];
+
+        // Pintar filas y pins
+        data.forEach(item => {
+          // Table row
+          const tr = document.createElement("tr");
+          tr.className = "border-b hover:bg-gray-50";
+          tr.innerHTML = `
+            <td class="px-4 py-2">${item.title}</td>
+            <td class="px-4 py-2">${new Date(item.date_time).toLocaleDateString()}</td>
+            <td class="px-4 py-2">${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}</td>
+            <td class="px-4 py-2">
+              <span class="inline-block text-xs font-medium py-1 px-2 rounded-full
+                ${item.status==="verified"?"bg-green-100 text-green-800":
+                  item.status==="pending"?"bg-yellow-100 text-yellow-800":
+                  "bg-red-100 text-red-800"}">
+                ${item.status}
+              </span>
+            </td>
+            <td class="px-4 py-2 text-right">
+              <a href="/sighting.html?id=${item.id}" target="_blank"
+                 class="text-blue-600 hover:underline">View</a>
+            </td>
+          `;
+          tableBody.appendChild(tr);
+
+          // Map marker
+          if (item.latitude && item.longitude) {
+            const m = L.marker([item.latitude, item.longitude])
+                    .addTo(map)
+                    .bindPopup(`<strong>${item.title}</strong><br>${item.description}`);
+            markers.push(m);
+          }
+        });
+
+      } catch (err) {
+        console.error("Error cargando avistamientos:", err);
+        tableBody.innerHTML = `
+          <tr><td colspan="5" class="px-4 py-6 text-center text-red-600">
+            No se pudieron cargar los avistamientos.
+          </td></tr>`;
+      }
     }
 
-    async function loadSightings(filters = {}) {
-      const ps = new URLSearchParams(filters);
-      const res = await fetch(API_URL + '&' + ps);
-      const { data } = await res.json();
-
-      document.getElementById('count-total').textContent = data.length;
-      document.getElementById('count-verified').textContent = data.filter(i=>i.status==='verified').length;
-      document.getElementById('count-pending').textContent = data.filter(i=>i.status==='pending').length;
-
-      cardsContainer.innerHTML = '';
-      markers.clearLayers();
-
-      data.forEach(item => {
-        cardsContainer.append(createCard(item));
-        if(item.latitude && item.longitude) {
-          L.marker([item.latitude, item.longitude]).bindPopup(`<b>${item.title}</b><br>${item.location_name}`).addTo(markers);
-        }
-      });
-
-      const bounds = markers.getBounds();
-      if(bounds.isValid()) map.fitBounds(bounds, { padding:[20,20] });
-    }
-
-    document.getElementById('filters').addEventListener('submit', e => {
-      e.preventDefault();
-      const filters = Object.fromEntries(new FormData(e.target));
-      loadSightings(filters);
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // insert map inside sidebar card
-      const mapCard = document.querySelector('aside + div .map-card');
-      const mapEl = document.getElementById('map');
-      mapCard.replaceWith(mapEl);
+    document.addEventListener("DOMContentLoaded", () => {
       initMap();
       loadSightings();
+      // Re-cargar cada 10 seg (si quieres)
+      setInterval(() => loadSightings(), 10000);
+      // Formulario de filtros
+      document.getElementById("filter-form")
+              .addEventListener("submit", e => {
+        e.preventDefault();
+        const form = e.target;
+        loadSightings({
+          from:     form.from.value,
+          to:       form.to.value,
+          location: form.location.value,
+          status:   form.status.value
+        });
+      });
     });
   </script>
+
 </body>
 </html>
