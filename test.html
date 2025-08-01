@@ -140,11 +140,9 @@
 
     async function loadSightings(params = {}) {
       try {
-        // Construir URL con filtros
         const url = new URL(API_URL);
         Object.entries(params).forEach(([k,v]) => v && url.searchParams.set(k, v));
-        // Campos que queremos traer
-        url.searchParams.set("fields", "title,description,date_time,latitude,longitude,status");
+        url.searchParams.set("fields", "id,title,description,date_time,latitude,longitude,status");
         const res = await fetch(url, { mode: 'cors' });
         if (!res.ok) throw new Error(res.status);
         const { data } = await res.json();
@@ -154,20 +152,25 @@
         verifiedCard.textContent = data.filter(i=>i.status==="verified").length;
         pendingCard.textContent  = data.filter(i=>i.status==="pending").length;
 
-        // Limpiar tabla y marcadores
+        // Limpiar
         tableBody.innerHTML = "";
         markers.forEach(m=>map.removeLayer(m));
         markers = [];
 
-        // Pintar filas y pins
         data.forEach(item => {
-          // Table row
+          // Prepara location y evita llamar a toFixed si es null
+          const lat = item.latitude, lng = item.longitude;
+          const loc = (lat != null && lng != null)
+            ? `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+            : 'N/A';
+
+          // Fila de tabla
           const tr = document.createElement("tr");
           tr.className = "border-b hover:bg-gray-50";
           tr.innerHTML = `
             <td class="px-4 py-2">${item.title}</td>
             <td class="px-4 py-2">${new Date(item.date_time).toLocaleDateString()}</td>
-            <td class="px-4 py-2">${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}</td>
+            <td class="px-4 py-2">${loc}</td>
             <td class="px-4 py-2">
               <span class="inline-block text-xs font-medium py-1 px-2 rounded-full
                 ${item.status==="verified"?"bg-green-100 text-green-800":
@@ -179,13 +182,12 @@
             <td class="px-4 py-2 text-right">
               <a href="/sighting.html?id=${item.id}" target="_blank"
                  class="text-blue-600 hover:underline">View</a>
-            </td>
-          `;
+            </td>`;
           tableBody.appendChild(tr);
 
-          // Map marker
-          if (item.latitude && item.longitude) {
-            const m = L.marker([item.latitude, item.longitude])
+          // Marcador en mapa solo si lat/lng válidos
+          if (lat != null && lng != null) {
+            const m = L.marker([lat, lng])
                     .addTo(map)
                     .bindPopup(`<strong>${item.title}</strong><br>${item.description}`);
             markers.push(m);
@@ -204,20 +206,18 @@
     document.addEventListener("DOMContentLoaded", () => {
       initMap();
       loadSightings();
-      // Re-cargar cada 10 seg (si quieres)
       setInterval(() => loadSightings(), 10000);
-      // Formulario de filtros
       document.getElementById("filter-form")
-              .addEventListener("submit", e => {
-        e.preventDefault();
-        const form = e.target;
-        loadSightings({
-          from:     form.from.value,
-          to:       form.to.value,
-          location: form.location.value,
-          status:   form.status.value
+        .addEventListener("submit", e => {
+          e.preventDefault();
+          const form = e.target;
+          loadSightings({
+            from:     form.from.value,
+            to:       form.to.value,
+            location: form.location.value,
+            status:   form.status.value
+          });
         });
-      });
     });
   </script>
 
