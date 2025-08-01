@@ -1,215 +1,200 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UAPON Sightings Dashboard</title>
-  <!-- Tailwind CSS + Custom Theme -->
+  <title>UAPON SaaS Dashboard</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS with Extended Theme -->
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
           colors: {
-            primary: '#2563EB',    /* Blue-600 */
-            accent: '#10B981',     /* Green-500 */
-            warning: '#FBBF24',    /* Yellow-400 */
-            danger: '#EF4444',     /* Red-500 */
-            bg: '#0F172A',         /* Slate-900 */
-            card: '#1E293B',       /* Slate-800 */
-            text: '#F1F5F9'        /* Slate-100 */
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif']
+            primary: '#4F46E5',
+            secondary: '#10B981',
+            muted: '#6B7280',
+            bg: '#F9FAFB',
+            card: '#FFFFFF',
+            sidebar: '#3730A3'
           }
         }
       }
     }
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Heroicons for icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
   <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
-<body class="bg-bg text-text font-sans">
 
-  <!-- Navbar -->
-  <header class="bg-card shadow-md">
-    <div class="container mx-auto flex items-center justify-between px-6 py-4">
-      <a href="#" class="text-2xl font-bold text-text">UAPON</a>
-      <nav class="space-x-6 hidden md:flex">
-        <a href="#" class="hover:text-primary transition">Inicio</a>
-        <a href="#" class="hover:text-primary transition">Sightings</a>
-        <a href="#" class="hover:text-primary transition">Contacto</a>
-      </nav>
-      <button id="menu-btn" class="md:hidden text-2xl">☰</button>
+<body class="font-sans bg-bg text-gray-800 flex h-screen overflow-hidden">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-sidebar text-white flex flex-col">
+    <div class="h-16 flex items-center justify-center text-2xl font-bold border-b border-sidebar/50">
+      UAPON
     </div>
-    <nav id="mobile-menu" class="hidden bg-card border-t border-gray-700">
-      <a href="#" class="block px-6 py-3 hover:bg-primary/10">Inicio</a>
-      <a href="#" class="block px-6 py-3 hover:bg-primary/10">Sightings</a>
-      <a href="#" class="block px-6 py-3 hover:bg-primary/10">Contacto</a>
+    <nav class="flex-1 px-4 py-6 space-y-4">
+      <a href="#" class="flex items-center p-2 rounded hover:bg-sidebar/70 transition">
+        <i data-feather="home" class="w-5 h-5 mr-3"></i> Dashboard
+      </a>
+      <a href="#" class="flex items-center p-2 rounded bg-sidebar/70">
+        <i data-feather="map-pin" class="w-5 h-5 mr-3"></i> Sightings
+      </a>
+      <a href="#" class="flex items-center p-2 rounded hover:bg-sidebar/70 transition">
+        <i data-feather="users" class="w-5 h-5 mr-3"></i> Community
+      </a>
+      <a href="#" class="flex items-center p-2 rounded hover:bg-sidebar/70 transition">
+        <i data-feather="settings" class="w-5 h-5 mr-3"></i> Settings
+      </a>
     </nav>
-  </header>
-
-  <!-- Hero -->
-  <section class="bg-[url('starry-bg.jpg')] bg-cover bg-center py-20">
-    <div class="container mx-auto text-center px-6">
-      <h1 class="text-5xl font-bold mb-4">UAPON Sightings Dashboard</h1>
-      <p class="text-lg text-text/80">Explora los reportes de fenómenos aéreos no identificados en tu comunidad.</p>
+    <div class="p-4 border-t border-sidebar/50">
+      <button class="w-full flex items-center justify-center bg-secondary px-4 py-2 rounded hover:bg-secondary/90 transition">
+        <i data-feather="plus" class="w-4 h-4 mr-2"></i> New Report
+      </button>
     </div>
-  </section>
+  </aside>
 
-  <!-- Main Content -->
-  <main class="container mx-auto px-6 py-12">
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col overflow-auto">
+    <!-- Top Navbar -->
+    <header class="h-16 bg-white flex items-center justify-between px-6 shadow">
+      <div class="flex items-center space-x-4">
+        <button id="menu-toggle" class="md:hidden text-xl text-gray-600"><i data-feather="menu"></i></button>
+        <h1 class="text-2xl font-semibold">Sightings</h1>
+      </div>
+      <div class="flex items-center space-x-6">
+        <div class="relative">
+          <input type="text" id="search" placeholder="Search..."
+            class="pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary" />
+          <div class="absolute top-2 left-3 text-muted"><i data-feather="search"></i></div>
+        </div>
+        <img src="https://i.pravatar.cc/40" alt="User" class="w-8 h-8 rounded-full" />
+      </div>
+    </header>
 
-    <!-- Filters & Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      <!-- Filters Card -->
-      <div class="bg-card rounded-lg p-6 shadow-lg">
-        <h2 class="text-xl font-semibold mb-4">Filtros</h2>
-        <form id="filters" class="space-y-4">
-          <input type="date" name="from" class="w-full bg-bg rounded px-4 py-2 focus:ring-primary" placeholder="Desde">
-          <input type="date" name="to"   class="w-full bg-bg rounded px-4 py-2 focus:ring-primary" placeholder="Hasta">
-          <input type="text" name="location_name" class="w-full bg-bg rounded px-4 py-2 focus:ring-primary" placeholder="Ubicación">
-          <select name="status" class="w-full bg-bg rounded px-4 py-2 focus:ring-primary">
-            <option value="">Cualquier Estado</option>
-            <option value="pending">Pendiente</option>
-            <option value="verified">Verificado</option>
-            <option value="rejected">Rechazado</option>
+    <!-- Content Area -->
+    <main class="flex-1 p-6 bg-bg space-y-6">
+      <!-- Metrics -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="bg-card p-6 rounded-lg shadow flex items-center">
+          <i data-feather="clock" class="w-6 h-6 text-primary mr-4"></i>
+          <div>
+            <p id="count-total" class="text-3xl font-semibold">0</p>
+            <p class="text-muted">Total Sightings</p>
+          </div>
+        </div>
+        <div class="bg-card p-6 rounded-lg shadow flex items-center">
+          <i data-feather="check-circle" class="w-6 h-6 text-secondary mr-4"></i>
+          <div>
+            <p id="count-verified" class="text-3xl font-semibold">0</p>
+            <p class="text-muted">Verified</p>
+          </div>
+        </div>
+        <div class="bg-card p-6 rounded-lg shadow flex items-center">
+          <i data-feather="clock" class="w-6 h-6 text-warning mr-4"></i>
+          <div>
+            <p id="count-pending" class="text-3xl font-semibold">0</p>
+            <p class="text-muted">Pending</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="bg-card p-6 rounded-lg shadow">
+        <h2 class="text-lg font-semibold mb-4">Filter Sightings</h2>
+        <form id="filters" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <input type="date" name="from" class="p-2 border rounded focus:ring-2 focus:ring-primary" placeholder="From" />
+          <input type="date" name="to"   class="p-2 border rounded focus:ring-2 focus:ring-primary" placeholder="To" />
+          <input type="text" name="location_name" class="p-2 border rounded focus:ring-2 focus:ring-primary" placeholder="Location" />
+          <select name="status" class="p-2 border rounded focus:ring-2 focus:ring-primary">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
           </select>
-          <button type="submit" class="w-full bg-primary text-white rounded py-2 font-medium hover:bg-primary/90 transition">Aplicar</button>
+          <button type="submit" class="md:col-span-2 bg-primary text-white rounded p-2 font-medium hover:bg-primary/90 transition">
+            Apply Filters
+          </button>
         </form>
       </div>
-      
-      <!-- Stats Cards -->
-      <div class="md:col-span-2 grid grid-cols-3 gap-6">
-        <div class="bg-card rounded-lg p-6 shadow-lg text-center">
-          <p class="text-3xl font-bold" id="count-total">0</p>
-          <p class="text-text/70 mt-1">Total</p>
-        </div>
-        <div class="bg-card rounded-lg p-6 shadow-lg text-center">
-          <p class="text-3xl font-bold text-accent" id="count-verified">0</p>
-          <p class="text-text/70 mt-1">Verificados</p>
-        </div>
-        <div class="bg-card rounded-lg p-6 shadow-lg text-center">
-          <p class="text-3xl font-bold text-warning" id="count-pending">0</p>
-          <p class="text-text/70 mt-1">Pendientes</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sightings Grid & Map -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
       <!-- Cards Grid -->
-      <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Each card will be injected here -->
-      </div>
+      <div id="cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-      <!-- Map Panel -->
-      <div class="bg-card rounded-lg shadow-lg p-4">
-        <h2 class="text-xl font-semibold mb-4">Mapa de Avistamientos</h2>
-        <div id="map" class="w-full h-96 rounded-lg"></div>
-      </div>
+    </main>
+  </div>
 
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-bg py-8 px-6">
-    <div class="container mx-auto text-center text-text/60">
-      &copy; 2025 UAPON. Todos los derechos reservados.
-    </div>
-  </footer>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <!-- Leaflet JS & Integration Script -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Mobile menu
-    document.getElementById('menu-btn')?.addEventListener('click', () => {
-      document.getElementById('mobile-menu').classList.toggle('hidden');
-    });
+    feather.replace();
 
-    // API endpoint
     const API_URL = 'https://uapon.directus.app/items/sightings?fields=id,title,description,date_time,location_name,latitude,longitude,status';
-
-    let map, layer;
-    const cardsContainer = document.querySelector('main .lg\\:col-span-2');
+    let map, markers;
+    const cardsContainer = document.getElementById('cards');
 
     function initMap() {
-      map = L.map('map').setView([4.6939, -74.0696], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-      }).addTo(map);
-      layer = L.layerGroup().addTo(map);
+      map = L.map(document.createElement('div')).setView([4.6939, -74.0696], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      markers = L.layerGroup().addTo(map);
     }
 
     function createCard(item) {
-      const div = document.createElement('div');
-      div.className = 'bg-card rounded-lg shadow-lg p-6 flex flex-col';
-      div.innerHTML = `
-        <h3 class="text-lg font-semibold mb-2 truncate">${item.title}</h3>
-        <p class="text-text/80 flex-1 mb-4 line-clamp-3">${item.description}</p>
-        <p class="text-sm text-text/60 mb-1">Fecha: ${new Date(item.date_time).toLocaleDateString()}</p>
-        <p class="text-sm text-text/60 mb-3">Ubicación: ${item.location_name || '—'}</p>
+      const card = document.createElement('div');
+      card.className = 'bg-card p-6 rounded-lg shadow flex flex-col justify-between';
+      card.innerHTML = `
+        <div>
+          <h3 class="text-xl font-semibold mb-2 truncate">${item.title}</h3>
+          <p class="text-muted mb-4 line-clamp-3">${item.description}</p>
+        </div>
+        <div class="text-sm text-muted mb-2">${new Date(item.date_time).toLocaleDateString()}</div>
         <div class="flex items-center justify-between">
-          <span class="px-2 py-1 text-xs rounded ${
-            item.status==='verified'? 'bg-accent text-white':
-            item.status==='pending' ? 'bg-warning text-white':
-                                      'bg-danger text-white'
-          }">${item.status}</span>
-          <a href="sighting.html?id=${item.id}" class="text-primary font-medium hover:underline">Ver más →</a>
+          <span class="px-2 py-1 text-xs rounded ${item.status==='verified'?'bg-secondary text-white':item.status==='pending'?'bg-warning text-white':'bg-danger text-white'}">${item.status}</span>
+          <a href="sighting.html?id=${item.id}" class="text-primary hover:underline text-sm">Details →</a>
         </div>
       `;
-      return div;
+      return card;
     }
 
     async function loadSightings(filters = {}) {
-      // build query string
-      let qs = Object.entries(filters)
-        .filter(([_, v]) => v)
-        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-        .join('&');
-      const url = API_URL + (qs? '&' + qs : '');
-      const res = await fetch(url);
+      const ps = new URLSearchParams(filters);
+      const res = await fetch(API_URL + '&' + ps);
       const { data } = await res.json();
 
-      // stats
       document.getElementById('count-total').textContent = data.length;
       document.getElementById('count-verified').textContent = data.filter(i=>i.status==='verified').length;
       document.getElementById('count-pending').textContent = data.filter(i=>i.status==='pending').length;
 
-      // clear
       cardsContainer.innerHTML = '';
-      layer.clearLayers();
+      markers.clearLayers();
 
       data.forEach(item => {
-        // add card
         cardsContainer.append(createCard(item));
-        // add marker
         if(item.latitude && item.longitude) {
-          L.marker([item.latitude, item.longitude])
-            .bindPopup(`<strong>${item.title}</strong><br>${item.location_name}`)
-            .addTo(layer);
+          L.marker([item.latitude, item.longitude]).bindPopup(`<b>${item.title}</b><br>${item.location_name}`).addTo(markers);
         }
       });
 
-      // map bounds
-      const b = layer.getBounds();
-      if(b.isValid()) map.fitBounds(b, { padding:[20,20] });
+      const bounds = markers.getBounds();
+      if(bounds.isValid()) map.fitBounds(bounds, { padding:[20,20] });
     }
 
-    document.getElementById('filters').addEventListener('submit', e=>{
+    document.getElementById('filters').addEventListener('submit', e => {
       e.preventDefault();
-      const f = Object.fromEntries(new FormData(e.target));
-      loadSightings(f);
+      const filters = Object.fromEntries(new FormData(e.target));
+      loadSightings(filters);
     });
 
-    document.addEventListener('DOMContentLoaded', ()=>{
+    document.addEventListener('DOMContentLoaded', () => {
+      // insert map inside sidebar card
+      const mapCard = document.querySelector('aside + div .map-card');
+      const mapEl = document.getElementById('map');
+      mapCard.replaceWith(mapEl);
       initMap();
       loadSightings();
     });
